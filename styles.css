@@ -1,0 +1,23 @@
+.wrap { padding: 1.5rem 0; font-family: var(--font-sans, system-ui, sans-serif); }
+.section-label { font-size: 13px; color: var(--color-text-secondary, #666); margin: 0 0 6px; }
+.card { background: var(--color-background-primary, #fff); border: 0.5px solid var(--color-border-tertiary, #e0e0e0); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.metric { background: var(--color-background-secondary, #f5f5f5); border-radius: 8px; padding: 12px 14px; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary, #666); margin: 0 0 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary, #111); margin: 0; }
+.metric-sub { font-size: 12px; color: var(--color-text-secondary, #666); margin: 4px 0 0; }
+.stock-row { display: grid; grid-template-columns: 80px 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 10px; }
+.stock-row label { font-size: 12px; color: var(--color-text-secondary, #666); display: block; margin-bottom: 4px; }
+.stock-row input { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 0.5px solid #ccc; border-radius: 6px; font-size: 13px; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+.tag-ok { background: #e6f4ea; color: #1e6e3a; }
+.tag-warn { background: #fff8e1; color: #8a6000; }
+.tag-danger { background: #fdecea; color: #b71c1c; }
+.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary, #e0e0e0); margin: 1.25rem 0; }
+.progress-wrap { background: var(--color-background-secondary, #f5f5f5); border-radius: 99px; height: 6px; margin: 8px 0 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; transition: width 0.3s; background: #1e6e3a; }
+.col-header { font-size: 11px; color: #aaa; }
+h1 { font-size: 20px; font-weight: 500; margin: 0 0 1.25rem; color: var(--color-text-primary, #111); }
+h2 { font-size: 15px; font-weight: 500; margin: 0 0 1rem; color: var(--color-text-primary, #111); }
+input[type="number"] { padding: 6px 8px; border: 0.5px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; }
+input[type="number"]:focus { border-color: #555; }
