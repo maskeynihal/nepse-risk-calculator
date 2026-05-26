@@ -1,0 +1,189 @@
+
+<style>
+  .wrap { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .section-label { font-size: 13px; color: var(--color-text-secondary); margin: 0 0 6px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px; }
+  .metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .metric-sub { font-size: 12px; color: var(--color-text-secondary); margin: 4px 0 0; }
+  .stock-row { display: grid; grid-template-columns: 80px 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 10px; }
+  .stock-row label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+  .stock-row input { width: 100%; box-sizing: border-box; }
+  .result-row { display: grid; grid-template-columns: 80px 1fr 1fr 1fr; gap: 10px; align-items: center; padding: 10px 0; border-top: 0.5px solid var(--color-border-tertiary); }
+  .result-row:first-of-type { border-top: none; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); font-weight: 500; }
+  .tag-ok { background: var(--color-background-success); color: var(--color-text-success); }
+  .tag-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .tag-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.25rem 0; }
+  .total-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+  .total-label { font-size: 13px; color: var(--color-text-secondary); }
+  .total-value { font-size: 15px; font-weight: 500; }
+  .progress-wrap { background: var(--color-background-secondary); border-radius: 99px; height: 6px; margin: 8px 0 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
+  .col-header { font-size: 11px; color: var(--color-text-tertiary); }
+  h2 { font-size: 16px; font-weight: 500; margin: 0 0 1rem; color: var(--color-text-primary); }
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">NEPSE swing trade risk management calculator</h2>
+
+  <div class="metric-grid">
+    <div class="metric">
+      <p class="metric-label">Total portfolio</p>
+      <p class="metric-value" id="m-portfolio">Rs. 10,00,000</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Max risk / trade</p>
+      <p class="metric-value" id="m-risk-per">Rs. 20,000</p>
+      <p class="metric-sub">2% per position</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Total risk cap</p>
+      <p class="metric-value" id="m-risk-total">Rs. 60,000</p>
+      <p class="metric-sub">6% across 3 stocks</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Risk used</p>
+      <p class="metric-value" id="m-used">Rs. 0</p>
+      <p class="metric-sub" id="m-used-pct">0% of portfolio</p>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 6px;">
+    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+      <span style="color: var(--color-text-secondary);">Risk exposure</span>
+      <span id="bar-pct" style="color: var(--color-text-secondary);">0% / 6%</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="risk-bar" style="width: 0%; background: var(--color-background-success);"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div style="margin-bottom: 10px;">
+    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0 0 8px;">Portfolio size (Rs.)</p>
+    <input type="number" id="portfolio-input" value="1000000" step="10000" style="width: 200px;" oninput="recalc()">
+  </div>
+
+  <hr class="divider">
+
+  <h2 style="font-size: 15px; margin-bottom: 12px;">Position sizing — 3 stocks</h2>
+
+  <div class="stock-row" style="margin-bottom: 4px;">
+    <span class="col-header">Stock</span>
+    <span class="col-header">Entry price (Rs.)</span>
+    <span class="col-header">Stop-loss price (Rs.)</span>
+    <span class="col-header">Units to buy</span>
+  </div>
+
+  <div id="stocks-wrap"></div>
+
+  <hr class="divider">
+
+  <div class="card" style="margin-bottom: 0;">
+    <p style="font-size: 13px; font-weight: 500; margin: 0 0 10px; color: var(--color-text-primary);">How this works</p>
+    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0 0 6px; line-height: 1.6;">
+      <strong style="color: var(--color-text-primary);">Units = Risk amount ÷ (Entry − Stop-loss)</strong>
+    </p>
+    <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0; line-height: 1.6;">
+      e.g. Portfolio Rs. 10,00,000 → Risk Rs. 20,000 per trade. Entry Rs. 300, Stop Rs. 285 → loss per unit = Rs. 15 → buy 1,333 units.
+    </p>
+  </div>
+</div>
+
+<script>
+const STOCKS = ['Stock A', 'Stock B', 'Stock C'];
+const state = { portfolio: 1000000, entries: [300, 400, 200], stops: [285, 380, 188] };
+
+function fmt(n) { return 'Rs. ' + Math.round(n).toLocaleString('en-IN'); }
+
+function renderRows() {
+  const wrap = document.getElementById('stocks-wrap');
+  wrap.innerHTML = '';
+  STOCKS.forEach((name, i) => {
+    const row = document.createElement('div');
+    row.className = 'stock-row';
+    row.innerHTML = `
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${name}</span>
+      <div>
+        <label>Entry price</label>
+        <input type="number" min="1" step="1" value="${state.entries[i]}" oninput="updateVal(${i},'entry',this.value)">
+      </div>
+      <div>
+        <label>Stop-loss</label>
+        <input type="number" min="1" step="1" value="${state.stops[i]}" oninput="updateVal(${i},'stop',this.value)">
+      </div>
+      <div id="result-${i}" style="font-size:13px;"></div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function updateVal(i, type, val) {
+  if (type === 'entry') state.entries[i] = parseFloat(val) || 0;
+  else state.stops[i] = parseFloat(val) || 0;
+  recalc();
+}
+
+function recalc() {
+  const pVal = parseFloat(document.getElementById('portfolio-input').value) || 0;
+  state.portfolio = pVal;
+  const riskPerTrade = state.portfolio * 0.02;
+  const totalCap = riskPerTrade * 3;
+
+  document.getElementById('m-portfolio').textContent = fmt(pVal);
+  document.getElementById('m-risk-per').textContent = fmt(riskPerTrade);
+  document.getElementById('m-risk-total').textContent = fmt(totalCap);
+
+  let totalRiskUsed = 0;
+
+  STOCKS.forEach((_, i) => {
+    const entry = state.entries[i];
+    const stop = state.stops[i];
+    const el = document.getElementById('result-' + i);
+    if (!el) return;
+
+    const diff = entry - stop;
+    if (diff <= 0 || entry <= 0) {
+      el.innerHTML = `<span style="color:var(--color-text-tertiary);font-size:12px;">Set valid prices</span>`;
+      return;
+    }
+
+    const units = Math.floor(riskPerTrade / diff);
+    const actualRisk = units * diff;
+    const actualRiskPct = pVal > 0 ? (actualRisk / pVal * 100) : 0;
+    const totalCost = units * entry;
+
+    const overFlag = actualRiskPct > 2.05;
+    const tagClass = overFlag ? 'tag-danger' : 'tag-ok';
+    const tagText = overFlag ? '> 2%' : actualRiskPct.toFixed(2) + '%';
+
+    el.innerHTML = `
+      <div style="font-weight:500;font-size:14px;color:var(--color-text-primary);">${units.toLocaleString('en-IN')} units</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin:2px 0;">Cost: ${fmt(totalCost)}</div>
+      <span class="tag ${tagClass}">${tagText} risk</span>
+    `;
+
+    totalRiskUsed += actualRisk;
+  });
+
+  const usedPct = pVal > 0 ? (totalRiskUsed / pVal * 100) : 0;
+  document.getElementById('m-used').textContent = fmt(totalRiskUsed);
+  document.getElementById('m-used-pct').textContent = usedPct.toFixed(2) + '% of portfolio';
+  document.getElementById('bar-pct').textContent = usedPct.toFixed(2) + '% / 6%';
+
+  const barWidth = Math.min(100, (usedPct / 6) * 100);
+  const bar = document.getElementById('risk-bar');
+  bar.style.width = barWidth + '%';
+  if (usedPct > 6) bar.style.background = 'var(--color-background-danger)';
+  else if (usedPct > 4.5) bar.style.background = 'var(--color-background-warning)';
+  else bar.style.background = 'var(--color-background-success)';
+}
+
+renderRows();
+recalc();
+</script>
